@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b6b45"><title>Swarajya AI Review Assistant</title>
+<style>
+:root{--green:#0b6b45;--dark:#14352a;--muted:#65756d;--bg:#f3f7f4;--line:#dce8e0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--dark)}
+main{max-width:600px;margin:28px auto;padding:16px}.card{background:white;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 8px 30px #173b2810}
+.brand{text-align:center}.sun{font-size:34px}.brand h1{margin:4px 0;color:var(--green);font-size:25px}.sub{color:var(--muted);font-size:13px}
+h2{font-size:19px;margin:22px 0 8px}label{display:block;font-weight:650;margin:14px 0 6px}
+select,textarea{width:100%;border:1px solid #cbd9d0;border-radius:12px;padding:12px;font:inherit;background:#fff;color:var(--dark)}
+textarea{min-height:76px;resize:vertical}button,.linkbtn{display:block;width:100%;border:0;border-radius:12px;padding:13px 16px;font:700 16px system-ui;cursor:pointer;text-align:center;text-decoration:none}
+.primary{background:var(--green);color:#fff;margin-top:18px}.secondary{background:#eaf3ed;color:var(--green);margin-top:10px}
+button:disabled{opacity:.55;cursor:wait}.note{font-size:12px;color:var(--muted);margin-top:12px}.hidden{display:none}.result{white-space:pre-wrap;background:#f5f8f6;border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
+.status{font-size:13px;color:var(--muted);margin-top:10px;min-height:20px}.footer{text-align:center;color:var(--muted);font-size:12px;margin:18px}
+</style>
+</head>
+<body><main><section class="card">
+<header class="brand"><div class="sun">☀️</div><h1>Swarajya Solar Services</h1><div class="sub">AI Review Assistant · Majboot kaam, sada aaram</div></header>
+<h2>Share your experience</h2>
+<p class="sub">Tell us what actually happened. We’ll help you put your own experience into words.</p>
+<label for="language">Review language</label>
+<select id="language"><option>Marathi</option><option>Hindi</option><option>English</option></select>
+<label for="work">Installation / work quality</label><textarea id="work" placeholder="For example: neat installation, completed on time…"></textarea>
+<label for="team">Team behaviour and service</label><textarea id="team" placeholder="For example: polite, explained the system clearly…"></textarea>
+<label for="materials">Material quality (if you can comment on it)</label><textarea id="materials" placeholder="Your honest experience with panels, inverter, structure…"></textarea>
+<label for="aftercare">After-sales support / anything else (optional)</label><textarea id="aftercare" placeholder="Mention only what you personally experienced…"></textarea>
+<button class="primary" id="generate">Generate my review draft</button><div class="status" id="status" role="status"></div>
+<div id="output" class="hidden"><h2>Your review draft</h2><div class="result" id="draft"></div>
+<button class="secondary" id="copy">Copy review</button>
+<a class="linkbtn primary" id="google" href="https://g.page/r/CezK92iIQdRIEBM/review" target="_blank" rel="noopener">Open Google review page</a>
+<p class="note">Please read and edit this draft so it accurately reflects your experience. You decide whether to post it. No rating is preselected or required.</p></div>
+</section><div class="footer">Swarajya Solar Services · Shahada · Shirpur · Nandurbar</div></main>
+<script>
+const $=id=>document.getElementById(id);
+$('generate').addEventListener('click',async()=>{
+ const answers={language:$('language').value,work:$('work').value.trim(),team:$('team').value.trim(),materials:$('materials').value.trim(),aftercare:$('aftercare').value.trim()};
+ if(!answers.work&&!answers.team&&!answers.materials&&!answers.aftercare){$('status').textContent='Please share at least one detail about your real experience.';return;}
+ $('generate').disabled=true;$('status').textContent='Writing your draft…';
+ try{
+  const res=await fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(answers)});
+  const data=await res.json();if(!res.ok)throw new Error(data.error||'Could not generate the review.');
+  $('draft').textContent=data.review;$('output').classList.remove('hidden');$('status').textContent='Draft ready. Please check it before posting.';
+ }catch(e){$('status').textContent=e.message;}
+ finally{$('generate').disabled=false;}
+});
+$('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('draft').textContent);$('status').textContent='Review copied.';}catch(e){$('status').textContent='Please select and copy the review text manually.';}});
+</script></body></html>
